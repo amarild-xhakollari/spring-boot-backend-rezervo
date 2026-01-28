@@ -1,0 +1,6 @@
+1 --?? in TimeOffService  ??--  I want to add a check inside addTimeOff to see if there
+are already appointments booked during those dates.
+If there are, you might want to warn the owner:
+ "You have 3 clients booked during this vacation. Please cancel them first."
+
+2 --??
