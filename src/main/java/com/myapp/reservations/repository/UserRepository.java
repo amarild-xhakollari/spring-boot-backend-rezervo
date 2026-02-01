@@ -1,6 +1,6 @@
 package com.myapp.reservations.repository;
-import com.myapp.reservations.entities.User.Role;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.Role;
+import com.myapp.reservations.entities.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

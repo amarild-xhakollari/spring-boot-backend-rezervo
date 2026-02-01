@@ -1,0 +1,3 @@
+1 - remove logic from controller methods (authentication controller   ;  file controller  )
+2 - In controller classes   , response type -> response entity
+3 - Exception handling

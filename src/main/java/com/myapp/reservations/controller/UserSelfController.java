@@ -2,7 +2,7 @@ package com.myapp.reservations.controller;
 
 import com.myapp.reservations.dto.businessdto.BusinessRequest;
 import com.myapp.reservations.dto.businessdto.BusinessResponse;
-import com.myapp.reservations.dto.userdto.ProfileUpdateRequest;
+import com.myapp.reservations.dto.userdto.UserRequest;
 import com.myapp.reservations.dto.userdto.UserResponse;
 import com.myapp.reservations.service.BusinessService;
 import com.myapp.reservations.service.UserService;
@@ -34,9 +34,9 @@ public class UserSelfController {
     }
 
     @PutMapping
-    public void updateMyProfile(@Valid @RequestBody ProfileUpdateRequest request) {
+    public void updateMyProfile(@Valid @RequestBody UserRequest request) {
         UUID currentUserId = userService.getCurrentUserId();
-        userService.updateProfile(currentUserId, request);
+        userService.updateUser(currentUserId, request);
     }
 
     @DeleteMapping

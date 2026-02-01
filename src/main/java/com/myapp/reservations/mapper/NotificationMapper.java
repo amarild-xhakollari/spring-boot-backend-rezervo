@@ -1,7 +1,7 @@
 package com.myapp.reservations.mapper;
 
 import com.myapp.reservations.dto.notificationdto.NotificationResponse;
-import com.myapp.reservations.entities.Notification.Notification;
+import com.myapp.reservations.entities.notification.Notification;
 
 public class NotificationMapper {
 

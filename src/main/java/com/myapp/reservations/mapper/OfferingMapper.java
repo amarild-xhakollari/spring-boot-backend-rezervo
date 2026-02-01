@@ -2,7 +2,7 @@ package com.myapp.reservations.mapper;
 
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingRequest;
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingResponse;
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
+import com.myapp.reservations.entities.businessSchedule.Offering;
 
 public class OfferingMapper {
 

@@ -1,4 +1,4 @@
-package com.myapp.reservations.entities.User;
+package com.myapp.reservations.entities.user;
 
 
 import com.myapp.reservations.entities.businessentity.Business;

@@ -4,8 +4,8 @@ import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsRequest;
 import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsResponse;
 import com.myapp.reservations.dto.workingdaydto.WorkingDayRequest;
 import com.myapp.reservations.dto.workingdaydto.WorkingDayResponse;
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
-import com.myapp.reservations.entities.BusinessSchedule.WorkingDay;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.businessSchedule.WorkingDay;
 
 import java.time.DayOfWeek;
 import java.util.List;

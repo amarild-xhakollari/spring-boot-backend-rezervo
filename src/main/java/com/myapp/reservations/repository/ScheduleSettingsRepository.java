@@ -1,6 +1,6 @@
 package com.myapp.reservations.repository;
 
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

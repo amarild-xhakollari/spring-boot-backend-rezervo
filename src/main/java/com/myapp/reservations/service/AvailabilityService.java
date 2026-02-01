@@ -1,13 +1,14 @@
 package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.BusyBlockResponse;
+import com.myapp.reservations.exception.notfoundexceptions.ScheduleNotFoundException;
 import com.myapp.reservations.repository.ReservationRepository;
 import com.myapp.reservations.repository.ScheduleSettingsRepository;
 import com.myapp.reservations.repository.TimeOffRepository;
-import com.myapp.reservations.entities.Reservation.Reservation;
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
-import com.myapp.reservations.entities.BusinessSchedule.TimeOff;
-import com.myapp.reservations.entities.BusinessSchedule.WorkingDay;
+import com.myapp.reservations.entities.reservation.Reservation;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.businessSchedule.TimeOff;
+import com.myapp.reservations.entities.businessSchedule.WorkingDay;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -35,7 +36,7 @@ public class AvailabilityService {
         List<BusyBlockResponse> busyBlocks = new ArrayList<>();
 
         ScheduleSettings settings = scheduleSettingsRepository.getScheduleSettingsByBusinessId(businessId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException(businessId));
 
         busyBlocks.addAll(calculateClosedBlocks(settings, viewStart, viewEnd));
 

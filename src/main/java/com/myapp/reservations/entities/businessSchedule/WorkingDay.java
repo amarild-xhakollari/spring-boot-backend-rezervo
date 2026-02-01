@@ -1,4 +1,4 @@
-package com.myapp.reservations.entities.BusinessSchedule;
+package com.myapp.reservations.entities.businessSchedule;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

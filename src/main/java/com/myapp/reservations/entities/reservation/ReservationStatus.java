@@ -1,4 +1,4 @@
-package com.myapp.reservations.entities.Reservation;
+package com.myapp.reservations.entities.reservation;
 
 public enum ReservationStatus {
     CANCELLED, PENDING, CONFIRMED

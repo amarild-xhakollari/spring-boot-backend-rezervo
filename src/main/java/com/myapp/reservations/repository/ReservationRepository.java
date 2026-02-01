@@ -1,6 +1,6 @@
 package com.myapp.reservations.repository;
 
-import com.myapp.reservations.entities.Reservation.Reservation;
+import com.myapp.reservations.entities.reservation.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

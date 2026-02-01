@@ -2,12 +2,14 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.reviewdto.ReviewRequest;
 import com.myapp.reservations.dto.reviewdto.ReviewResponse;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.ReviewRepository;
 import com.myapp.reservations.repository.UserRepository;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.Review.Review;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.review.Review;
+import com.myapp.reservations.entities.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,10 +47,10 @@ public class ReviewService {
         }
 
         Business business = businessRepository.getBusinessById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
 
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         Review review = new Review();
         review.setBusiness(business);

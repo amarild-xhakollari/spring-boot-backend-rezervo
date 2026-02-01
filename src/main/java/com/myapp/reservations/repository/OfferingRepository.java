@@ -1,6 +1,6 @@
 package com.myapp.reservations.repository;
 
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
+import com.myapp.reservations.entities.businessSchedule.Offering;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

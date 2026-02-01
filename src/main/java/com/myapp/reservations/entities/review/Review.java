@@ -1,8 +1,7 @@
-package com.myapp.reservations.entities.Reservation;
+package com.myapp.reservations.entities.review;
 
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,33 +12,35 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "reviews")
 @Getter
 @Setter
-public class Reservation {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_id", nullable = false)
     private Business business;
 
-    @ManyToOne
-    @JoinColumn(name = "service_id", nullable = false)
-    private Offering offering;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime startDateTime;
-    private LocalDateTime endDateTime;
+    @Column(nullable = false)
+    private Integer rating;
 
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    @Column(length = 1000)
+    private String comment;
 
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

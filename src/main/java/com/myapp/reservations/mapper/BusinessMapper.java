@@ -4,7 +4,7 @@ import com.myapp.reservations.dto.businessdto.BusinessRequest;
 import com.myapp.reservations.dto.businessdto.BusinessResponse;
 import com.myapp.reservations.entities.businessentity.Business;
 import com.myapp.reservations.entities.businessentity.BusinessType;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.User;
 
 import java.util.ArrayList;
 import java.util.List;

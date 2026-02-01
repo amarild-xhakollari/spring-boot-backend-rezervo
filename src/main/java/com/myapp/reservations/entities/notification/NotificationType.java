@@ -1,4 +1,4 @@
-package com.myapp.reservations.entities.Notification;
+package com.myapp.reservations.entities.notification;
 
 public enum NotificationType {
     INFO,

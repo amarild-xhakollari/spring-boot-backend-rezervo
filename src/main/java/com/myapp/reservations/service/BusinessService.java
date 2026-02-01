@@ -3,12 +3,14 @@ package com.myapp.reservations.service;
 import com.myapp.reservations.dto.businessdto.BusinessRequest;
 import com.myapp.reservations.dto.businessdto.BusinessResponse;
 import com.myapp.reservations.dto.userdto.UserResponse;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.mapper.BusinessMapper;
 import com.myapp.reservations.mapper.UserMapper;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.UserRepository;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +29,12 @@ public class BusinessService {
         this.scheduleService=scheduleService;
     }
 
-    public BusinessResponse getBusinessById(UUID id) {
-        if(id == null) {
-            return null;
+    public BusinessResponse getBusinessById(UUID businessId) {
+        if(businessId == null) {
+            throw new IllegalArgumentException("Id not provided") ;
         }
-        Optional<Business> business = businessRepository.findById(id);
-        return business.map(BusinessMapper::toResponse).orElse(null);
+        Optional<Business> business = businessRepository.findById(businessId);
+        return business.map(BusinessMapper::toResponse).orElseThrow(() -> new BusinessNotFoundException( businessId));
     }
 
     public List<BusinessResponse> getAllBusinesses() {
@@ -42,37 +44,45 @@ public class BusinessService {
 
     public BusinessResponse getBusinessByName(String name) {
         if(name == null) {
-            return null;
+            throw new IllegalArgumentException("BusinessName not provided");
         }
         Optional<Business> business = businessRepository.getBusinessByName(name);
-        return business.map(BusinessMapper::toResponse).orElse(null);
+        return business.map(BusinessMapper::toResponse).orElseThrow(() -> new BusinessNotFoundException(name));
     }
 
     public List<BusinessResponse> getAllBusinessesByUserId(UUID ownerId) {
         if(ownerId == null) {
-            return null;
+            throw new IllegalArgumentException("OwnerId not provided");
         }
-        Optional<User> user = userRepository.findById(ownerId);
-        if (user.isEmpty()) {
-            return null;
-        }
-        List<Business> businesses = businessRepository.getAllBusinessByUserId(user.get().getId());
+        User user = userRepository.findById(ownerId)
+                .orElseThrow(() -> new UserNotFoundException(ownerId));
+
+        List<Business> businesses = businessRepository.getAllBusinessByUserId(user.getId());
         return businesses.stream().map(BusinessMapper::toResponse).toList();
     }
 
-    public void deleteBusinessById(UUID id) {
-        if(id == null) {
-            return;
+    public void deleteBusinessById(UUID businessId) {
+
+        if(businessId == null) {
+            throw new IllegalArgumentException("BusinessId not provided");
         }
-        businessRepository.deleteById(id);
+
+        if(!businessRepository.existsById(businessId)){
+            throw new BusinessNotFoundException(businessId);
+        }
+        businessRepository.deleteById(businessId);
     }
 
     @Transactional
     public BusinessResponse createBusiness(BusinessRequest request, UUID currentUserId) {
-        if (request == null) return null;
-
+        if (request == null) {
+            throw new IllegalArgumentException("BusinessRequest not provided");
+        }
+        if(currentUserId == null){
+            throw new IllegalArgumentException("CurrentUserId not provided");
+        }
         User owner = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("Owner not found"));
+                .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         Business business = BusinessMapper.toBusiness(request, owner);
         scheduleService.createDefaultSchedule(business);
@@ -85,9 +95,16 @@ public class BusinessService {
     }
 
     @Transactional
-    public BusinessResponse updateBusiness(UUID id, BusinessRequest request) {
-        Business existing = businessRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+    public BusinessResponse updateBusiness(UUID businessId, BusinessRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("BusinessRequest not provided");
+        }
+        if(businessId == null){
+            throw new IllegalArgumentException("BusinessId not provided");
+        }
+
+        Business existing = businessRepository.findById(businessId)
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
 
         if (request.name() != null) existing.setName(request.name());
         if (request.description() != null) existing.setDescription(request.description());
@@ -97,16 +114,16 @@ public class BusinessService {
         existing.setCustomType(request.customType());
 
         Business saved = businessRepository.save(existing);
+
         return BusinessMapper.toResponse(saved);
     }
-
 
     @Transactional
     public void addAdminToBusiness(UUID businessId, UUID userId) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         business.getAdmins().add(user);
         user.getAdminOfBusinesses().add(business);
@@ -118,13 +135,13 @@ public class BusinessService {
     }
 
     public List<UserResponse> getAllAdmins(UUID businessId){
-        Business business = businessRepository.getBusinessById(businessId).orElseThrow(() -> new RuntimeException("business not found"));
+        Business business = businessRepository.getBusinessById(businessId).orElseThrow(() -> new BusinessNotFoundException(businessId));
         return business.getAdmins().stream().map(UserMapper::toResponse).toList();
     }
 
     public boolean isOwnerOrAdmin(UUID businessId, UUID userId) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
 
         if (business.getOwner().getId().equals(userId)) {
             return true;
@@ -137,14 +154,14 @@ public class BusinessService {
     @Transactional
     public void updateImage(UUID businessId, String imagePath) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
         business.setImagePath(imagePath);
         businessRepository.save(business);
     }
 
     public String getImagePath(UUID businessId) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
         return business.getImagePath();
     }
 }

@@ -2,11 +2,12 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingRequest;
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingResponse;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
 import com.myapp.reservations.mapper.OfferingMapper;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.OfferingRepository;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
+import com.myapp.reservations.entities.businessSchedule.Offering;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class OfferingService {
         if(businessId == null){
             return null;
         }
-        Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new RuntimeException("Business not found"));
+        Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new BusinessNotFoundException(businessId));
         return business.getOfferings().stream().map(OfferingMapper::toResponse).toList();
     }
 

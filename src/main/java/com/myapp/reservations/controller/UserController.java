@@ -3,7 +3,7 @@ package com.myapp.reservations.controller;
 import com.myapp.reservations.dto.userdto.UserRequest;
 import com.myapp.reservations.dto.userdto.UserResponse;
 import com.myapp.reservations.service.UserService;
-import com.myapp.reservations.entities.User.Role;
+import com.myapp.reservations.entities.user.Role;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +55,7 @@ public class UserController {
     @PutMapping("/update/{id}")
     public void update(@PathVariable UUID id, @Valid @RequestBody UserRequest userRequest){
         if(userRequest == null || id == null) return ;
-        userService.updateUser(id, userRequest);
+        userService.
+                updateUser(id, userRequest);
     }
 }

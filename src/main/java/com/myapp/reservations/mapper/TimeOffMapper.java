@@ -2,8 +2,8 @@ package com.myapp.reservations.mapper;
 
 import com.myapp.reservations.dto.timeoffdto.TimeOffRequest;
 import com.myapp.reservations.dto.timeoffdto.TimeOffResponse;
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
-import com.myapp.reservations.entities.BusinessSchedule.TimeOff;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.businessSchedule.TimeOff;
 
 public class TimeOffMapper {
 

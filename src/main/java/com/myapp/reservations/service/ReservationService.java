@@ -2,14 +2,16 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.reservationdto.ReservationRequest;
 import com.myapp.reservations.dto.reservationdto.ReservationResponse;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.mapper.ReservationMapper;
 import com.myapp.reservations.repository.*;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.BusinessSchedule.*;
-import com.myapp.reservations.entities.Notification.NotificationType;
-import com.myapp.reservations.entities.Reservation.Reservation;
-import com.myapp.reservations.entities.Reservation.ReservationStatus;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.businessSchedule.*;
+import com.myapp.reservations.entities.notification.NotificationType;
+import com.myapp.reservations.entities.reservation.Reservation;
+import com.myapp.reservations.entities.reservation.ReservationStatus;
+import com.myapp.reservations.entities.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -86,13 +88,14 @@ public class ReservationService {
         LocalDateTime endDateTime = startDateTime.plusMinutes(offering.getDurationMinutes());
 
         ScheduleSettings schedule = scheduleSettingsRepository.getScheduleSettingsByBusinessId(reservationRequest.businessId())
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+                .orElseThrow(() -> new new ScheduleNotFoundException());
 
         validateWorkingHours(startDateTime, endDateTime, schedule);
 
         validateAdvanceBookingRequirements(startDateTime, schedule);
 
-        Business business = businessRepository.getBusinessById(reservationRequest.businessId()).orElseThrow(()-> new RuntimeException("Business not found"));
+        Business business = businessRepository.getBusinessById(reservationRequest.businessId())
+                .orElseThrow(()-> new BusinessNotFoundException(reservationRequest.businessId()));
 
         if (reservationRepository.existsOverlap(business.getId(), startDateTime, endDateTime)) {
             throw new RuntimeException("This time slot is already reserved by another customer.");
@@ -108,7 +111,7 @@ public class ReservationService {
 
         UUID currentUserId = userService.getCurrentUserId();
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+                .orElseThrow(() -> new UserNotFoundException(currentUserId));
         reservation.setUser(user);
 
         reservation.setStartDateTime(startDateTime);

@@ -1,7 +1,7 @@
-package com.myapp.reservations.entities.BusinessSchedule;
+package com.myapp.reservations.entities.businessSchedule;
 
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.Reservation.ReservationType;
+import com.myapp.reservations.entities.reservation.ReservationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

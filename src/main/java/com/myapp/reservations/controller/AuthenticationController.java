@@ -4,10 +4,11 @@ import com.myapp.reservations.dto.userdto.AuthResponse;
 import com.myapp.reservations.dto.SignInRequest;
 import com.myapp.reservations.dto.userdto.UserRequest;
 import com.myapp.reservations.dto.userdto.UserResponse;
+import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.repository.UserRepository;
 import com.myapp.reservations.service.UserService;
 import com.myapp.reservations.security.JwtUtil;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -64,7 +65,7 @@ public class AuthenticationController {
 
         User authenticatedUser = userRepository.findByName(userDetails.getUsername());
         if(authenticatedUser == null){
-            throw new RuntimeException("User not found");
+            throw  new UserNotFoundException(userDetails.getUsername());
         }
 
         String token = jwtUtils.generateToken(userDetails.getUsername(), authenticatedUser.getId());

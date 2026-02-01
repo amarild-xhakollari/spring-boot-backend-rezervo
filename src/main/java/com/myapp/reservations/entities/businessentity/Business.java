@@ -1,9 +1,9 @@
 package com.myapp.reservations.entities.businessentity;
 
 
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.businessSchedule.Offering;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

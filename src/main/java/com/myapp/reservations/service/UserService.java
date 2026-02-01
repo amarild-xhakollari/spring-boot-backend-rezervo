@@ -1,12 +1,12 @@
 package com.myapp.reservations.service;
 
-import com.myapp.reservations.dto.userdto.ProfileUpdateRequest;
 import com.myapp.reservations.dto.userdto.UserRequest;
 import com.myapp.reservations.dto.userdto.UserResponse;
+import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.mapper.UserMapper;
 import com.myapp.reservations.repository.UserRepository;
-import com.myapp.reservations.entities.User.Role;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.user.Role;
+import com.myapp.reservations.entities.user.User;
 import com.myapp.reservations.security.AuthTokenFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -106,33 +106,16 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateUser(UUID id, UserRequest request) {
+    public UserResponse updateUser(UUID userId, UserRequest request) {
 
-        User existing = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User existing = userRepository.findById(userId)
+                .orElseThrow(() ->  new UserNotFoundException(userId));
 
         if (request.name() != null) existing.setName(request.name());
         if (request.email() != null) existing.setEmail(request.email());
         if (request.phone() != null) existing.setPhone(request.phone());
 
         if (request.password() != null) {
-            existing.setPassword(passwordEncoder.encode(request.password()));
-        }
-
-        User saved = userRepository.save(existing);
-        return UserMapper.toResponse(saved);
-    }
-
-    @Transactional
-    public UserResponse updateProfile(UUID id, ProfileUpdateRequest request) {
-        User existing = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (request.name() != null) existing.setName(request.name());
-        if (request.email() != null) existing.setEmail(request.email());
-        if (request.phone() != null) existing.setPhone(request.phone());
-
-        if (request.password() != null && !request.password().isBlank()) {
             existing.setPassword(passwordEncoder.encode(request.password()));
         }
 
@@ -155,7 +138,7 @@ public class UserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByName(auth.getName());
         if (user == null) {
-            throw new RuntimeException("User not found. Please log in again.");
+            throw new UserNotFoundException(auth.getName());
         }
         return user.getId();
     }
@@ -163,14 +146,14 @@ public class UserService {
     @Transactional
     public void updateAvatar(UUID userId, String avatarPath) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->  new UserNotFoundException(userId));
         user.setAvatarPath(avatarPath);
         userRepository.save(user);
     }
 
     public String getAvatarPath(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new  UserNotFoundException(userId));
         return user.getAvatarPath();
     }
 }

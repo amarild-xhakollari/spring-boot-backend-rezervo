@@ -3,14 +3,15 @@ package com.myapp.reservations.service;
 import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsRequest;
 import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsResponse;
 import com.myapp.reservations.dto.workingdaydto.WorkingDayRequest;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
 import com.myapp.reservations.mapper.ScheduleMapper;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.ScheduleSettingsRepository;
 import com.myapp.reservations.repository.WorkingDayRepository;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.Reservation.ReservationType;
-import com.myapp.reservations.entities.BusinessSchedule.ScheduleSettings;
-import com.myapp.reservations.entities.BusinessSchedule.WorkingDay;
+import com.myapp.reservations.entities.reservation.ReservationType;
+import com.myapp.reservations.entities.businessSchedule.ScheduleSettings;
+import com.myapp.reservations.entities.businessSchedule.WorkingDay;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class ScheduleService {
         if (businessId == null) return;
 
         ScheduleSettings existing = scheduleSettingsRepository.getScheduleSettingsByBusinessId(businessId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+                .orElseThrow(() -> new new ScheduleNotFoundException());
 
 
         if (request.reservationType() != null) {
@@ -141,7 +142,7 @@ public class ScheduleService {
         if(businessId ==null){
             return null;
         }
-        Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new RuntimeException("Business not found"));
+        Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new BusinessNotFoundException(businessId));
 
         return ScheduleMapper.toResponse(business.getScheduleSettings());
 

@@ -1,6 +1,7 @@
 package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.businessphotodto.BusinessPhotoResponse;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
 import com.myapp.reservations.repository.BusinessPhotoRepository;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.entities.businessentity.Business;
@@ -57,7 +58,7 @@ public class BusinessPhotoService {
         }
 
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
 
         Integer maxOrder = photoRepository.findMaxDisplayOrderByBusinessId(businessId);
 

@@ -1,6 +1,6 @@
 package com.myapp.reservations.dto.notificationdto;
 
-import com.myapp.reservations.entities.Notification.NotificationType;
+import com.myapp.reservations.entities.notification.NotificationType;
 
 import java.util.UUID;
 

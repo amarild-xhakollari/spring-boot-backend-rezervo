@@ -1,6 +1,6 @@
 package com.myapp.reservations.repository;
 
-import com.myapp.reservations.entities.BusinessSchedule.WorkingDay;
+import com.myapp.reservations.entities.businessSchedule.WorkingDay;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.DayOfWeek;

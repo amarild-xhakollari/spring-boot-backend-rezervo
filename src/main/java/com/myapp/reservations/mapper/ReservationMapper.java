@@ -3,10 +3,10 @@ package com.myapp.reservations.mapper;
 import com.myapp.reservations.dto.reservationdto.ReservationRequest;
 import com.myapp.reservations.dto.reservationdto.ReservationResponse;
 import com.myapp.reservations.entities.businessentity.Business;
-import com.myapp.reservations.entities.Reservation.Reservation;
-import com.myapp.reservations.entities.Reservation.ReservationStatus;
-import com.myapp.reservations.entities.BusinessSchedule.Offering;
-import com.myapp.reservations.entities.User.User;
+import com.myapp.reservations.entities.reservation.Reservation;
+import com.myapp.reservations.entities.reservation.ReservationStatus;
+import com.myapp.reservations.entities.businessSchedule.Offering;
+import com.myapp.reservations.entities.user.User;
 
 import java.time.LocalDateTime;
 
