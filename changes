@@ -1,3 +1,48 @@
-1 - remove logic from controller methods (authentication controller   ;  file controller  )
-2 - In controller classes   , response type -> response entity
-3 - Exception handling
+1. No use of pagination means retriving all the rows, heavy query for the database, also the heap memory will be over populated.
+
+2. Instead of returning List or Objects on the rest controller you can return ResponseEntity with proper status.
+
+3. See TSID generation. It's time based instead of random as UUID. Better for performance.
+
+4. You use Enumerated(EnumType.STRING) witch is fine. It's nice to know the difference between EnumType.String and EnumType.Ordinal, check it out.
+
+5. Instead of using jpa mappings ManyToMany, OneToMany, ManyToOne you can just store the id of the object. Later you can write a query to get what information you need.
+
+6. You don't store createdAt and updatedAt in db. It's useful information, sorting, filtering, indexing. Check out spring auditing, it has nice solution.
+
+7. You need to work on the exception handling. When the frontend sends request and the backend fails you can't return null. It needs to show the reason why it failed, you can't return null to the frontend. When error will occur as it will happen, exception handling makes your life better. See how spring boot global exception works.
+Let's take for example getReviewsByBusiness in ReviewService. You need to check if businessId exists in your db, if not then throw custom exception, ex. BusinessDoesNotExist, and in the message you have 'BusinessDoesNotExist with id: x'. This is important information for debugging issues. Migrate your runtime exceptions to custom exception, and make sure you send in the message the appropriate inforamtion as id.
+
+8. ReviewService ln 54 - 58. You can use private static factory constructors. The code will look like, Review review = Review.of(business, user, rating, comment).
+
+9. It's good to not mix the service and mappers. Mappers should be in dedicated classes or interfaces.
+
+10. Again see getBusinessOfferings(...), what will happen is return null to the client. Witch will not give you any valuable information on where the problem is.
+
+11. updateOffering instead of checking each field is it null you can do that in private method. The code will be more readble. But as you already have validation in the class OfferingRequest that means some of the validation is not needed( but check this i'm not 100% sure).
+
+12. In OfferingResponse createService you have extra query to db
+
+13. It's not a must but it's reccomended to not have logic in the API. Are you sure you can't put the logic in the service?
+UUID currentUserId = userService.getCurrentUserId();
+return businessService.createBusiness(request, currentUserId);
+
+14. Looking at Reservation toReservation static factory method can come in handy. Logic like this offering.getDurationMinutes() != null can be put in the factory. And you will always be sure that the object you create is valid.
+Think what happens in your case if  offering != null && offering.getDurationMinutes() != null is not valid. You get object that is not in valid state. You should throw exceptions when application tries to create a non-valid state object. Is object valid or non-valid it comes from the nature of the problem
+
+15. OfferingResponse createService ln 32. Same issue as before. if mapper returns null the offering.setBusiness(business); will get you null pointer exception.
+
+16. You can name your apis like '/api/v1'.
+
+17. FileController: uploadUserAvatar, too many things are happning in the api. That's not how it should look like. Create Response class, name it by your choice. There you have all the fields that you want to return to the frontend. updateAvatar, or different function can return that response(also the service can return dto and you should have mapper to convert dto to response), that function should do the complete logic, finding the user, storing the file, updating avatar... And the API should look something like this:
+return new ResponseEntity<>(
+    __ResponseMapper.to__Response(__Service.update(id, update__Request)),
+    HttpStatus.OK); (change _ to describe what the function does).
+It's your choice if you implement it or not but the reason behind having entity, dto and response is: Entity has all the rows, witch you can't return to the client because of securiy. DTO has extra fields, and DTO is meant for communication between services of the same application. But still DTO has fields that should not be returned to the client. Response is for the fields you want to return to the client.
+
+18. If in the future you mix Transactional methods and file operations you should be extra careful, because Transactional is on database level and doesn't rollback file changes. That means if the transaction fails but the file operation was successful, the changes of the file operation will persist.
+
+19. Maybe using spring's Transactional is better
+
+20. BusinessService ln 114 bug
+The main thing in my view is the exception handling. Returning null to client means you can't debug anything. Exception should be thrown whenever the application can get non-valid, not-natural state.

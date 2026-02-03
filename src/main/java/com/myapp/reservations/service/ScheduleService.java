@@ -4,6 +4,7 @@ import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsRequest;
 import com.myapp.reservations.dto.schedulesettingsdto.ScheduleSettingsResponse;
 import com.myapp.reservations.dto.workingdaydto.WorkingDayRequest;
 import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.ScheduleNotFoundException;
 import com.myapp.reservations.mapper.ScheduleMapper;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.ScheduleSettingsRepository;
@@ -70,7 +71,7 @@ public class ScheduleService {
         if (businessId == null) return;
 
         ScheduleSettings existing = scheduleSettingsRepository.getScheduleSettingsByBusinessId(businessId)
-                .orElseThrow(() -> new new ScheduleNotFoundException());
+                .orElseThrow(() -> new ScheduleNotFoundException(businessId));
 
 
         if (request.reservationType() != null) {

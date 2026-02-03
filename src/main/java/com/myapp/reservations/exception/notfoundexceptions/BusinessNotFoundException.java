@@ -2,8 +2,7 @@ package com.myapp.reservations.exception.notfoundexceptions;
 
 import java.util.UUID;
 
-public class BusinessNotFoundException extends NotFoundException {
-
+public class BusinessNotFoundException extends RuntimeException {
     public BusinessNotFoundException(UUID id){
 
         super("Business not found with ID : " + id);
@@ -13,5 +12,4 @@ public class BusinessNotFoundException extends NotFoundException {
 
         super("Business not found with name : " + name);
     }
-
 }

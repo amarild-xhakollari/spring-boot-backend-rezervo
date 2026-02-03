@@ -2,6 +2,8 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.notificationdto.NotificationRequest;
 import com.myapp.reservations.dto.notificationdto.NotificationResponse;
+import com.myapp.reservations.exception.UnauthorizedException;
+import com.myapp.reservations.exception.notfoundexceptions.NotificationNotFoundException;
 import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.mapper.NotificationMapper;
 import com.myapp.reservations.repository.NotificationRepository;
@@ -48,10 +50,10 @@ public class NotificationService {
     public NotificationResponse markAsRead(UUID notificationId) {
         UUID userId = userService.getCurrentUserId();
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new NotificationNotFoundException(notificationId));
 
         if (!notification.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized to access this notification");
+            throw new UnauthorizedException("notification", "access");
         }
 
         notification.setRead(true);

@@ -2,6 +2,7 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.reviewdto.ReviewRequest;
 import com.myapp.reservations.dto.reviewdto.ReviewResponse;
+import com.myapp.reservations.exception.conflictexceptions.DuplicateReviewException;
 import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
 import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.repository.BusinessRepository;
@@ -43,7 +44,7 @@ public class ReviewService {
         UUID currentUserId = userService.getCurrentUserId();
 
         if (reviewRepository.existsByBusinessIdAndUserId(businessId, currentUserId)) {
-            throw new RuntimeException("You have already reviewed this business");
+            throw new DuplicateReviewException(businessId);
         }
 
         Business business = businessRepository.getBusinessById(businessId)

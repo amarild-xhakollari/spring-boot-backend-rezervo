@@ -1,16 +1,16 @@
 package com.myapp.reservations.exception;
 
-import com.myapp.reservations.exception.notfoundexceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler  {
 
-    @ExceptionHandler(IllegalAccessError.class)
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex,
             HttpServletRequest request){
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler  {
                 ));
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
             RuntimeException ex ,
             HttpServletRequest request){
@@ -36,19 +36,55 @@ public class GlobalExceptionHandler  {
         ));
 
     }
-/*
-    @ExceptionHandler()
-    public ResponseEntity<ErrorResponse> handle(
-            RuntimeException ex ,
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            UnauthorizedException ex,
             HttpServletRequest request){
 
-        return ResponseEntity.status(HttpStatus.)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(
-                        ,
+                        403,
                         ex.getMessage(),
                         request.getRequestURI()
                 ));
-
     }
-*/
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(
+            ConflictException ex,
+            HttpServletRequest request){
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(
+                        409,
+                        ex.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
+    @ExceptionHandler(BusinessRuleViolationException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessRuleViolation(
+            BusinessRuleViolationException ex,
+            HttpServletRequest request){
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse(
+                        422,
+                        ex.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFound(
+            UsernameNotFoundException ex,
+            HttpServletRequest request){
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        401,
+                        ex.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
 }

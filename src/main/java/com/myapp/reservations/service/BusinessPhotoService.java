@@ -1,7 +1,10 @@
 package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.businessphotodto.BusinessPhotoResponse;
+import com.myapp.reservations.exception.UnauthorizedException;
+import com.myapp.reservations.exception.conflictexceptions.MaxPhotosReachedException;
 import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.BusinessPhotoNotFoundException;
 import com.myapp.reservations.repository.BusinessPhotoRepository;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.entities.businessentity.Business;
@@ -49,12 +52,12 @@ public class BusinessPhotoService {
         UUID userId = userService.getCurrentUserId();
 
         if (!businessService.isOwnerOrAdmin(businessId, userId)) {
-            throw new RuntimeException("Not authorized to add photos to this business");
+            throw new UnauthorizedException("business", "add photos to");
         }
 
         long photoCount = photoRepository.countByBusinessId(businessId);
         if (photoCount >= MAX_PHOTOS_PER_BUSINESS) {
-            throw new RuntimeException("Maximum number of photos (" + MAX_PHOTOS_PER_BUSINESS + ") reached");
+            throw new MaxPhotosReachedException(MAX_PHOTOS_PER_BUSINESS);
         }
 
         Business business = businessRepository.findById(businessId)
@@ -78,10 +81,10 @@ public class BusinessPhotoService {
         UUID userId = userService.getCurrentUserId();
 
         BusinessPhoto photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new RuntimeException("Photo not found"));
+                .orElseThrow(() -> new BusinessPhotoNotFoundException(photoId));
 
         if (!businessService.isOwnerOrAdmin(photo.getBusiness().getId(), userId)) {
-            throw new RuntimeException("Not authorized to delete this photo");
+            throw new UnauthorizedException("photo", "delete");
         }
 
         fileStorageService.deleteFile(photo.getFilePath());
@@ -94,10 +97,10 @@ public class BusinessPhotoService {
         UUID userId = userService.getCurrentUserId();
 
         BusinessPhoto photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new RuntimeException("Photo not found"));
+                .orElseThrow(() -> new BusinessPhotoNotFoundException(photoId));
 
         if (!businessService.isOwnerOrAdmin(photo.getBusiness().getId(), userId)) {
-            throw new RuntimeException("Not authorized to update this photo");
+            throw new UnauthorizedException("photo", "update");
         }
 
         photo.setCaption(caption);
