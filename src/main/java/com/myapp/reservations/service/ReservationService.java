@@ -2,12 +2,7 @@ package com.myapp.reservations.service;
 
 import com.myapp.reservations.dto.reservationdto.ReservationRequest;
 import com.myapp.reservations.dto.reservationdto.ReservationResponse;
-import com.myapp.reservations.exception.UnauthorizedException;
-import com.myapp.reservations.exception.businessruleviolations.*;
-import com.myapp.reservations.exception.conflictexceptions.ReservationConflictException;
 import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
-import com.myapp.reservations.exception.notfoundexceptions.OfferingNotFoundException;
-import com.myapp.reservations.exception.notfoundexceptions.ReservationNotFoundException;
 import com.myapp.reservations.exception.notfoundexceptions.ScheduleNotFoundException;
 import com.myapp.reservations.exception.notfoundexceptions.UserNotFoundException;
 import com.myapp.reservations.mapper.ReservationMapper;
@@ -62,21 +57,21 @@ public class ReservationService {
         WorkingDay config = settings.getWorkingDays().stream()
                 .filter(wd -> wd.getDayOfWeek().equals(dayOfWeek))
                 .findFirst()
-                .orElseThrow(() -> new BusinessClosedException(dayOfWeek));
+                .orElseThrow(() -> new RuntimeException("Business is not open on this day"));
 
         if (config.isDayOff()) {
-            throw new BusinessClosedException(dayOfWeek);
+            throw new RuntimeException("The business is closed on " + dayOfWeek);
         }
 
         LocalTime requestStart = startDateTime.toLocalTime();
         LocalTime requestEnd = endDateTime.toLocalTime();
 
         if (requestStart.isBefore(config.getStartTime()) || requestEnd.isAfter(config.getEndTime())) {
-            throw new OutsideWorkingHoursException(requestStart, config.getStartTime(), config.getEndTime());
+            throw new RuntimeException("Selected time is outside of business working hours");
         }
 
         if (config.getBreakStartTime() != null && requestStart.isBefore(config.getBreakEndTime()) && requestEnd.isAfter(config.getBreakStartTime())) {
-            throw new BreakTimeConflictException(config.getBreakStartTime(), config.getBreakEndTime());
+            throw new RuntimeException("Selected time overlaps with a business break");
         }
     }
 
@@ -84,17 +79,17 @@ public class ReservationService {
     public ReservationResponse createReservation(ReservationRequest reservationRequest){
 
         if(reservationRequest == null){
-            throw new IllegalArgumentException("Reservation request cannot be null");
+            throw new RuntimeException("Request is empty");
         }
 
         Offering offering = offeringRepository.findById(reservationRequest.offeringId())
-                .orElseThrow(() -> new OfferingNotFoundException(reservationRequest.offeringId()));
+                .orElseThrow(() -> new RuntimeException("Service Offering Not Found"));
 
         LocalDateTime startDateTime = reservationRequest.startTime();
         LocalDateTime endDateTime = startDateTime.plusMinutes(offering.getDurationMinutes());
 
-        com.myapp.reservations.entities.businessSchedule.ScheduleSettings schedule = scheduleSettingsRepository.getScheduleSettingsByBusinessId(reservationRequest.businessId())
-                .orElseThrow(() -> new ScheduleNotFoundException(reservationRequest.businessId()));
+        ScheduleSettings schedule = scheduleSettingsRepository.getScheduleSettingsByBusinessId(reservationRequest.businessId())
+                .orElseThrow(() ->  new ScheduleNotFoundException(reservationRequest.businessId()));
 
         validateWorkingHours(startDateTime, endDateTime, schedule);
 
@@ -104,11 +99,11 @@ public class ReservationService {
                 .orElseThrow(()-> new BusinessNotFoundException(reservationRequest.businessId()));
 
         if (reservationRepository.existsOverlap(business.getId(), startDateTime, endDateTime)) {
-            throw new ReservationConflictException(startDateTime);
+            throw new RuntimeException("This time slot is already reserved by another customer.");
         }
 
         if (timeOffRepository.hasTimeOffConflict(business.getId(), startDateTime, endDateTime)) {
-            throw new BusinessUnavailableException();
+            throw new RuntimeException("The business is unavailable during this time (Maintenance/Time Off).");
         }
 
         Reservation reservation =  new Reservation();
@@ -184,29 +179,31 @@ public class ReservationService {
         if (settings.getMinAdvanceBookingHours() != null) {
             LocalDateTime earliestAllowed = now.plusHours(settings.getMinAdvanceBookingHours());
             if (requestedStart.isBefore(earliestAllowed)) {
-                throw new BookingLeadTimeException(settings.getMinAdvanceBookingHours());
+                throw new RuntimeException("This booking is too short-notice. Minimum lead time is "
+                        + settings.getMinAdvanceBookingHours() + " hours.");
             }
         }
 
         if (settings.getMaxAdvanceBookingDays() != null) {
             LocalDateTime latestAllowed = now.plusDays(settings.getMaxAdvanceBookingDays());
             if (requestedStart.isAfter(latestAllowed)) {
-                throw new BookingWindowException(settings.getMaxAdvanceBookingDays());
+                throw new RuntimeException("This date is too far in the future. You can only book up to "
+                        + settings.getMaxAdvanceBookingDays() + " days in advance.");
             }
         }
 
         if (requestedStart.isBefore(now)) {
-            throw new PastDateReservationException(requestedStart);
+            throw new RuntimeException("Cannot create a reservation for a past date.");
         }
     }
 
     @Transactional
     public void cancelReservation(UUID reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+                .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + reservationId));
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new InvalidReservationStateException("CANCELLED", "cancel");
+            throw new RuntimeException("Reservation is already cancelled.");
         }
 
         UUID currentUserId = userService.getCurrentUserId();
@@ -246,15 +243,15 @@ public class ReservationService {
     @Transactional
     public ReservationResponse confirmReservation(UUID reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
         UUID currentUserId = userService.getCurrentUserId();
         if (!reservation.getBusiness().getOwner().getId().equals(currentUserId)) {
-            throw new UnauthorizedException("Only the business owner can confirm reservations");
+            throw new RuntimeException("Only the business owner can confirm reservations");
         }
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new InvalidReservationStateException(reservation.getStatus().toString(), "confirm");
+            throw new RuntimeException("Only pending reservations can be confirmed");
         }
 
         reservation.setStatus(ReservationStatus.CONFIRMED);
@@ -279,15 +276,15 @@ public class ReservationService {
     @Transactional
     public ReservationResponse rejectReservation(UUID reservationId, String reason) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
         UUID currentUserId = userService.getCurrentUserId();
         if (!reservation.getBusiness().getOwner().getId().equals(currentUserId)) {
-            throw new UnauthorizedException("Only the business owner can reject reservations");
+            throw new RuntimeException("Only the business owner can reject reservations");
         }
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new InvalidReservationStateException(reservation.getStatus().toString(), "reject");
+            throw new RuntimeException("Only pending reservations can be rejected");
         }
 
         reservation.setStatus(ReservationStatus.CANCELLED);

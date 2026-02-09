@@ -141,7 +141,7 @@ public class ScheduleService {
 
     public ScheduleSettingsResponse getScheduleByBusinessId(UUID businessId){
         if(businessId ==null){
-            throw new IllegalArgumentException("BusinessId not provided");
+            return null;
         }
         Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new BusinessNotFoundException(businessId));
 
