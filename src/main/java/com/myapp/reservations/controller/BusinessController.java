@@ -49,7 +49,6 @@ public class BusinessController {
 
     @PutMapping("/update/{id}")
     public BusinessResponse update(@PathVariable UUID id, @RequestBody BusinessRequest business) {
-        if (business == null || id == null) return null ;
         return businessService.updateBusiness(id, business);
     }
 
@@ -60,7 +59,6 @@ public class BusinessController {
 
     @GetMapping("{businessId}/admins")
     public List<UserResponse> getAllAdmins(@PathVariable UUID businessId){
-        if (businessId == null ) return null ;
         return businessService.getAllAdmins(businessId);
     }
 

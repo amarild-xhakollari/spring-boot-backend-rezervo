@@ -1,5 +1,6 @@
 package com.myapp.reservations.exception;
 
+import com.myapp.reservations.exception.notfoundexceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,9 @@ public class GlobalExceptionHandler  {
                 ));
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
-            RuntimeException ex ,
+            NotFoundException ex,
             HttpServletRequest request){
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -33,8 +34,7 @@ public class GlobalExceptionHandler  {
                         404,
                         ex.getMessage(),
                         request.getRequestURI()
-        ));
-
+                ));
     }
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
@@ -84,6 +84,19 @@ public class GlobalExceptionHandler  {
                 .body(new ErrorResponse(
                         401,
                         ex.getMessage(),
+                        request.getRequestURI()
+                ));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleUnexpectedError(
+            RuntimeException ex,
+            HttpServletRequest request){
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(
+                        500,
+                        "An unexpected error occurred: " + ex.getMessage(),
                         request.getRequestURI()
                 ));
     }

@@ -43,29 +43,31 @@ public class UserService {
 
     public UserResponse findByName(String name){
         if(name==null){
-            return null;
+            throw new IllegalArgumentException("Name not provided");
         }
         User user = userRepository.findByName(name);
-
+        if(user == null){
+            throw new UserNotFoundException(name);
+        }
         return UserMapper.toResponse(user);
     }
 
     public UserResponse findById(UUID id) {
 
         if(id==null){
-            return null;
+            throw new IllegalArgumentException("Id not provided");
         }
         Optional<User> user = userRepository.findById(id);
-        return user.map(UserMapper::toResponse).orElse(null);
+        return user.map(UserMapper::toResponse).orElseThrow(() -> new UserNotFoundException(id));
 
     }
 
     public UserResponse findByEmail(String email){
         if(email==null){
-            return null;
+            throw new IllegalArgumentException("Email not provided");
         }
         Optional<User> user = userRepository.findByEmail(email);
-        return user.map(UserMapper::toResponse).orElse(null);
+        return user.map(UserMapper::toResponse).orElseThrow(() -> new UserNotFoundException(email));
     }
 
     public boolean existsByEmail(String email){
@@ -78,7 +80,9 @@ public class UserService {
 
     @Transactional
     public UserResponse createUser(UserRequest request) {
-        if (request == null) return null;
+        if (request == null) {
+            throw new IllegalArgumentException("UserRequest not provided");
+        }
         User user = UserMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRoles(Set.of("USER"));
@@ -89,7 +93,7 @@ public class UserService {
 
     public List<UserResponse> getUsersByRoles(Role role) {
         if(role==null){
-            return null;
+            throw new IllegalArgumentException("Role not provided");
         }
         return userRepository.findByRoles(role)
                 .stream()

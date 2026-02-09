@@ -3,6 +3,7 @@ package com.myapp.reservations.service;
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingRequest;
 import com.myapp.reservations.dto.timeoffdto.offeringdto.OfferingResponse;
 import com.myapp.reservations.exception.notfoundexceptions.BusinessNotFoundException;
+import com.myapp.reservations.exception.notfoundexceptions.OfferingNotFoundException;
 import com.myapp.reservations.mapper.OfferingMapper;
 import com.myapp.reservations.repository.BusinessRepository;
 import com.myapp.reservations.repository.OfferingRepository;
@@ -28,15 +29,14 @@ public class OfferingService {
 
     @Transactional
     public OfferingResponse createService(@NotNull UUID businessId, @NotNull OfferingRequest offeringRequest) {
-        Business business = businessRepository.findById(businessId).orElseThrow();
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
 
         Offering offering = OfferingMapper.toOffering(offeringRequest);
         offering.setBusiness(business);
 
-        offeringRepository.save(offering);
-
-
-        return OfferingMapper.toResponse(offeringRepository.save(offering));
+        Offering saved = offeringRepository.save(offering);
+        return OfferingMapper.toResponse(saved);
     }
 
     public OfferingResponse getOfferingById(UUID offeringId){
@@ -46,7 +46,7 @@ public class OfferingService {
 
     public List<OfferingResponse> getBusinessOfferings(UUID businessId){
         if(businessId == null){
-            return null;
+            throw new IllegalArgumentException("BusinessId not provided");
         }
         Business business = businessRepository.getBusinessById(businessId).orElseThrow(()-> new BusinessNotFoundException(businessId));
         return business.getOfferings().stream().map(OfferingMapper::toResponse).toList();
@@ -59,7 +59,7 @@ public class OfferingService {
     @Transactional
     public OfferingResponse updateOffering(UUID offeringId, OfferingRequest request) {
         Offering existing = offeringRepository.findById(offeringId)
-                .orElseThrow(() -> new RuntimeException("Offering not found"));
+                .orElseThrow(() -> new OfferingNotFoundException(offeringId));
 
         if (request.name() != null) existing.setName(request.name());
         if (request.description() != null) existing.setDescription(request.description());

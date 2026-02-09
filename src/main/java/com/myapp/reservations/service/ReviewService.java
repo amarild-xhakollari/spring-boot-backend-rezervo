@@ -34,6 +34,13 @@ public class ReviewService {
     }
 
     public List<ReviewResponse> getReviewsByBusiness(UUID businessId) {
+        if(businessId == null){
+            throw new IllegalArgumentException("BusinessId not provided");
+        }
+        // Validate business exists
+        businessRepository.getBusinessById(businessId)
+                .orElseThrow(() -> new BusinessNotFoundException(businessId));
+
         return reviewRepository.findByBusinessIdOrderByCreatedAtDesc(businessId).stream()
                 .map(this::toResponse)
                 .toList();

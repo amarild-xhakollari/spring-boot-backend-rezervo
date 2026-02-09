@@ -111,7 +111,7 @@ public class BusinessService {
         if (request.address() != null) existing.setAddress(request.address());
         if (request.phone() != null) existing.setPhone(request.phone());
         if (request.businessType() != null) existing.setBusinessType(request.businessType());
-        existing.setCustomType(request.customType());
+        if (request.customType() != null) existing.setCustomType(request.customType());
 
         Business saved = businessRepository.save(existing);
 
@@ -127,11 +127,11 @@ public class BusinessService {
 
         business.getAdmins().add(user);
         user.getAdminOfBusinesses().add(business);
-        if(user.getRoles().contains("BUSINESS_ADMIN")) {
+        if(!user.getRoles().contains("BUSINESS_ADMIN")) {
             user.getRoles().add("BUSINESS_ADMIN");
         }
         userRepository.save(user);
-       businessRepository.save(business);
+        businessRepository.save(business);
     }
 
     public List<UserResponse> getAllAdmins(UUID businessId){

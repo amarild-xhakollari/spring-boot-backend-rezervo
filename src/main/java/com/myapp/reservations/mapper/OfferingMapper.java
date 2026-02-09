@@ -34,7 +34,7 @@ public class OfferingMapper {
                 entity.getPrice(),
                 entity.getDurationMinutes(),
                 entity.getBufferTimeMinutes(),
-                entity.getBusiness().getId()
+                entity.getBusiness() != null ? entity.getBusiness().getId() : null
         );
     }
 }
